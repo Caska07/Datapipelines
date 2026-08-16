@@ -1,0 +1,15 @@
+{
+	"name": "df-cdfs01",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b832f846-2305-4172-80bb-63ee2087604f",
+		"tenantId": "586e785a-8271-4fc6-a0c4-59fec8a68975"
+	}
+}
