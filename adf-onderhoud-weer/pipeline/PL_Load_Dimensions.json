@@ -1,0 +1,70 @@
+{
+    "name": "PL_Load_Dimensions",
+    "properties": {
+        "activities": [
+            {
+                "name": "Copy DimWerksoort",
+                "type": "Copy",
+                "inputs": [{ "referenceName": "DS_OLTP_WERKSOORT", "type": "DatasetReference" }],
+                "outputs": [{ "referenceName": "DS_OLAP_DimWerksoort", "type": "DatasetReference" }],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT SOORT_ID, CODE, OMSCHRIJVING FROM WERKSOORT"
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "upsert",
+                        "upsertSettings": { "useTempDB": true, "keys": ["SOORT_ID"] }
+                    }
+                }
+            },
+            {
+                "name": "Copy DimProject",
+                "type": "Copy",
+                "inputs": [{ "referenceName": "DS_OLTP_PROJECT", "type": "DatasetReference" }],
+                "outputs": [{ "referenceName": "DS_OLAP_DimProject", "type": "DatasetReference" }],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT PROJECT_ID, OMSCHRIJVING, STARTDATUM, EINDDATUM, BEGROTEBEDRAGBTW FROM PROJECT"
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "upsert",
+                        "upsertSettings": { "useTempDB": true, "keys": ["PROJECT_ID"] }
+                    }
+                }
+            },
+            {
+                "name": "Copy DimMelding",
+                "type": "Copy",
+                "inputs": [{ "referenceName": "DS_OLTP_WERKVERZOEK", "type": "DatasetReference" }],
+                "outputs": [{ "referenceName": "DS_OLAP_DimMelding", "type": "DatasetReference" }],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT WERKVERZOEK_ID, OMSCHRIJVING, BONJAAR, BONNMMR FROM WERKVERZOEK"
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "upsert",
+                        "upsertSettings": { "useTempDB": true, "keys": ["WERKVERZOEK_ID"] }
+                    }
+                }
+            },
+            {
+                "name": "Copy DimLocatie en DimObject",
+                "description": "Data Flow: join OBJECTEN + ADRES + COMPLEX, dedupliceer adrescombinatie naar DimLocatie, schrijf beide dims weg. Bouw dit als een Mapping Data Flow (DF_Load_DimObject) in ADF Studio; los Copy-activity volstaat niet omdat er een join + dedupe nodig is.",
+                "type": "ExecuteDataFlow",
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "DF_Load_DimObject",
+                        "type": "DataFlowReference"
+                    }
+                }
+            }
+        ],
+        "annotations": []
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "name": "PL_Load_Weerdata",
+    "properties": {
+        "activities": [
+            {
+                "name": "Haal weerdata Zuid-Limburg op",
+                "description": "Open-Meteo archive endpoint, centroid Zuid-Limburg (Heerlen). Retourneert daily-arrays; flattening + kolomberekening gebeurt in DF_Load_DimWeer.",
+                "type": "ExecuteDataFlow",
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "DF_Load_DimWeer",
+                        "type": "DataFlowReference",
+                        "datasetParameters": {}
+                    },
+                    "parameters": {
+                        "latitude": "50.888",
+                        "longitude": "5.980",
+                        "startDate": {
+                            "value": "@pipeline().parameters.StartDate",
+                            "type": "Expression"
+                        },
+                        "endDate": {
+                            "value": "@pipeline().parameters.EndDate",
+                            "type": "Expression"
+                        },
+                        "regioLabel": "Zuid-Limburg"
+                    },
+                    "compute": {
+                        "coreCount": 8,
+                        "computeType": "General"
+                    }
+                }
+            }
+        ],
+        "parameters": {
+            "StartDate": {
+                "type": "string",
+                "defaultValue": "@formatDateTime(adddays(utcnow(),-1),'yyyy-MM-dd')"
+            },
+            "EndDate": {
+                "type": "string",
+                "defaultValue": "@formatDateTime(utcnow(),'yyyy-MM-dd')"
+            }
+        },
+        "annotations": [],
+        "variables": {}
+    }
+}

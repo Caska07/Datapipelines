@@ -1,0 +1,67 @@
+{
+    "name": "PL_Load_FactWerk",
+    "properties": {
+        "activities": [
+            {
+                "name": "Lookup laatste watermark",
+                "type": "Lookup",
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT ISNULL(MAX(LastLoadedOpdrachtdatum), '1900-01-01') AS Watermark FROM ETL_Watermark WHERE TableName = 'FactWerk'"
+                    },
+                    "dataset": { "referenceName": "DS_OLAP_FactWerk", "type": "DatasetReference" }
+                }
+            },
+            {
+                "name": "Load nieuwe/gewijzigde WERKOPDRACHT rijen",
+                "description": "Data Flow: join WERKOPDRACHT (OLTP) + WERKVERZOEK -> lookup DimObject/DimWerksoort/DimMelding/DimProject/DimDatum/DimWeer -> bereken DoorlooptijdDagen -> upsert FactWerk op OPDRACHT_ID",
+                "type": "ExecuteDataFlow",
+                "dependsOn": [
+                    {
+                        "activity": "Lookup laatste watermark",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "DF_Load_FactWerk",
+                        "type": "DataFlowReference"
+                    },
+                    "parameters": {
+                        "watermark": {
+                            "value": "@activity('Lookup laatste watermark').output.firstRow.Watermark",
+                            "type": "Expression"
+                        }
+                    },
+                    "compute": {
+                        "coreCount": 8,
+                        "computeType": "General"
+                    }
+                }
+            },
+            {
+                "name": "Update watermark",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Load nieuwe/gewijzigde WERKOPDRACHT rijen",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "linkedServiceName": {
+                    "referenceName": "LS_SQL_OLAP",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "storedProcedureName": "usp_UpdateWatermark",
+                    "storedProcedureParameters": {
+                        "TableName": { "value": "FactWerk", "type": "String" },
+                        "LoadDatum": { "value": "@utcnow()", "type": "DateTime" }
+                    }
+                }
+            }
+        ],
+        "annotations": []
+    }
+}

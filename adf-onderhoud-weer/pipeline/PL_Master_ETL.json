@@ -1,0 +1,73 @@
+{
+    "name": "PL_Master_ETL",
+    "properties": {
+        "activities": [
+            {
+                "name": "Load Dimensions",
+                "type": "ExecutePipeline",
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "PL_Load_Dimensions",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Load Weerdata",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Load Dimensions",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "PL_Load_Weerdata",
+                        "type": "PipelineReference"
+                    },
+                    "parameters": {
+                        "StartDate": {
+                            "value": "@pipeline().parameters.StartDate",
+                            "type": "Expression"
+                        },
+                        "EndDate": {
+                            "value": "@pipeline().parameters.EndDate",
+                            "type": "Expression"
+                        }
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Load FactWerk",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Load Weerdata",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "PL_Load_FactWerk",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            }
+        ],
+        "parameters": {
+            "StartDate": {
+                "type": "string",
+                "defaultValue": ""
+            },
+            "EndDate": {
+                "type": "string",
+                "defaultValue": ""
+            }
+        },
+        "annotations": []
+    }
+}

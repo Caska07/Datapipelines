@@ -1,0 +1,14 @@
+{
+    "name": "DS_WeerAPI_Response",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_WeerAPI",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "RestResource",
+        "typeProperties": {
+            "relativeUrl": "archive"
+        }
+    }
+}

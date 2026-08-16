@@ -1,0 +1,28 @@
+{
+    "name": "TR_Daily_0600",
+    "properties": {
+        "annotations": [],
+        "runtimeState": "Started",
+        "pipelines": [
+            {
+                "pipelineReference": {
+                    "referenceName": "PL_Master_ETL",
+                    "type": "PipelineReference"
+                },
+                "parameters": {
+                    "StartDate": "@formatDateTime(addDays(utcnow(),-1),'yyyy-MM-dd')",
+                    "EndDate": "@formatDateTime(utcnow(),'yyyy-MM-dd')"
+                }
+            }
+        ],
+        "type": "ScheduleTrigger",
+        "typeProperties": {
+            "recurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "startTime": "2026-08-18T06:00:00Z",
+                "timeZone": "W. Europe Standard Time"
+            }
+        }
+    }
+}
